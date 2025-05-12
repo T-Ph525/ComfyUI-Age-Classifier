@@ -1,15 +1,18 @@
 [project]
 name = "comfyui-underage-filter"
-description = "An implementation to detect underages images for ComfyUI, also included a Boolean Gate to return 403 error for API requests"
+description = "An implementation to detect underage subjects in images for ComfyUI. Includes a Boolean Gate node to raise 403 errors for API safety handling."
 version = "1.0.1"
 license = { file = "LICENSE" }
-dependencies = ["transformers==4.37.2", "pillow==10.2.0"]
+dependencies = [
+    "transformers==4.37.2",
+    "pillow==10.2.0"
+]
 
 [project.urls]
 Repository = "https://github.com/T-Ph525/ComfyUI-Underage-Filter"
-#  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
 PublisherId = "mrcuddle"
-DisplayName = "ComfyUI-underage-filter"
+DisplayName = "Underage Filter"
 Icon = ""
+EntryPoint = "node.py"
