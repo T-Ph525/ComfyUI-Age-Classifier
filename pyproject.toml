@@ -1,15 +1,15 @@
 [project]
 name = "comfyui-nsfw-detection"
-description = "An implementation of NSFW Detection for ComfyUI"
+description = "An implementation to detect and block underage image requests ComfyUI API"
 version = "1.0.1"
 license = { file = "LICENSE" }
 dependencies = ["transformers==4.37.2", "pillow==10.2.0"]
 
 [project.urls]
-Repository = "https://github.com/trumanwong/ComfyUI-NSFW-Detection"
+Repository = "https://github.com/T-Ph525/ComfyUI-Safety-Blocker"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "trumanwong"
-DisplayName = "ComfyUI-NSFW-Detection"
+PublisherId = "T-Ph525"
+DisplayName = "ComfyUI-Safety-Blocker"
 Icon = ""
