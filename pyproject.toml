@@ -10,6 +10,6 @@ Repository = "https://github.com/T-Ph525/ComfyUI-Underage-Filter"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = "T-Ph525"
+PublisherId = "mrcuddle"
 DisplayName = "ComfyUI-underage-filter"
 Icon = ""
