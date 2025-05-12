@@ -29,7 +29,7 @@ class UnderageFilterNode:
 
     RETURN_TYPES = ("BOOLEAN",)
     FUNCTION = "check_underage"
-    CATEGORY = "Classifier/Safety"
+    CATEGORY = "Moderation/Detection"
 
     def check_underage(self, image, score):
         img_tensor = image[0]
@@ -42,10 +42,34 @@ class UnderageFilterNode:
         return (is_underage,)
 
 
+class BooleanGateNode:
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "condition": ("BOOLEAN",),
+                "message": ("STRING", {
+                    "default": "Content blocked due to moderation policy."
+                })
+            }
+        }
+
+    RETURN_TYPES = ()
+    FUNCTION = "evaluate"
+    CATEGORY = "Moderation/Blockers"
+
+    def evaluate(self, condition, message):
+        if condition:
+            raise PermissionError(403, message)
+        return ()
+
+
 NODE_CLASS_MAPPINGS = {
-    "UnderageFilterNode": UnderageFilterNode
+    "UnderageFilterNode": UnderageFilterNode,
+    "BooleanGateNode": BooleanGateNode
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UnderageFilterNode": "Underage Filter"
+    "UnderageFilterNode": "Underage Filter",
+    "BooleanGateNode": "Boolean Gate"
 }
