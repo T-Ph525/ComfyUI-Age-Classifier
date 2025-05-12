@@ -3,16 +3,9 @@ from transformers import pipeline
 import torchvision.transforms as T
 import torch
 import numpy
-import ast
 
 
-def tensor2pil(image):
-    return Image.fromarray(
-        numpy.clip(255. * image.cpu().numpy().squeeze(), 0, 255).astype(numpy.uint8)
-    )
-
-
-class UnderageBlockNode:
+class UnderageFilterNode:
     def __init__(self):
         self.classifier = pipeline("image-classification", model="nateraw/vit-age-classifier")
         self.to_pil = T.ToPILImage()
@@ -34,26 +27,25 @@ class UnderageBlockNode:
             },
         }
 
-    RETURN_TYPES = ("IMAGE",)
-    FUNCTION = "run"
-    CATEGORY = "Moderation/Blocker"
+    RETURN_TYPES = ("BOOLEAN",)
+    FUNCTION = "check_underage"
+    CATEGORY = "Classifier/Safety"
 
-    def run(self, image, score):
+    def check_underage(self, image, score):
         img_tensor = image[0]
         pil_img = self.to_pil(img_tensor.permute(2, 0, 1))
         results = self.classifier(pil_img)
 
         top = max(results, key=lambda r: r["score"])
-        if top["label"] in self.underage_labels and top["score"] >= score:
-            raise PermissionError(403, f"Underage content detected (label: {top['label']}, score: {top['score']:.3f})")
+        is_underage = top["label"] in self.underage_labels and top["score"] >= score
 
-        return (image,)
+        return (is_underage,)
 
 
 NODE_CLASS_MAPPINGS = {
-    "UnderageBlockNode": UnderageBlockNode
+    "UnderageFilterNode": UnderageFilterNode
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "UnderageBlockNode": "Underage Block"
+    "UnderageFilterNode": "Underage Filter"
 }
