@@ -1,5 +1,5 @@
 [project]
-name = "comfyui-nsfw-detection"
+name = "comfyui-safety-blocker"
 description = "An implementation to detect and block underage image requests ComfyUI API"
 version = "1.0.1"
 license = { file = "LICENSE" }
