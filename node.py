@@ -7,7 +7,7 @@ import numpy
 
 class UnderageFilterNode:
     def __init__(self):
-        self.classifier = pipeline("image-classification", model="nateraw/vit-age-classifier")
+        self.classifier = pipeline("image-classification", model="/comfy/models/age-classifier")
         self.to_pil = T.ToPILImage()
         self.underage_labels = {"0-2", "3-9", "10-19"}
 
