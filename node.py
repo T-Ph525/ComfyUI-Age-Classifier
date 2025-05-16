@@ -1,75 +1,46 @@
-from PIL import Image
 from transformers import pipeline
-import torchvision.transforms as T
+from PIL import Image
 import torch
-import numpy
+import os
 
-
-class UnderageFilterNode:
-    def __init__(self):
-        self.classifier = pipeline("image-classification", model="/comfy/models/age-classifier")
-        self.to_pil = T.ToPILImage()
-        self.underage_labels = {"0-2", "3-9", "10-19"}
-
+class UnderageFilterGateNode:
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "image": ("IMAGE",),
-                "score": ("FLOAT", {
-                    "default": 0.85,
-                    "min": 0.0,
-                    "max": 1.0,
-                    "step": 0.01,
-                    "round": 0.001,
-                    "display": "age_confidence_threshold"
-                }),
-            },
-        }
-
-    RETURN_TYPES = ("BOOLEAN",)
-    FUNCTION = "check_underage"
-    CATEGORY = "Moderation/Detection"
-
-    def check_underage(self, image, score):
-        img_tensor = image[0]
-        pil_img = self.to_pil(img_tensor.permute(2, 0, 1))
-        results = self.classifier(pil_img)
-
-        top = max(results, key=lambda r: r["score"])
-        is_underage = top["label"] in self.underage_labels and top["score"] >= score
-
-        return (is_underage,)
-
-
-class BooleanGateNode:
-    @classmethod
-    def INPUT_TYPES(cls):
-        return {
-            "required": {
-                "condition": ("BOOLEAN",),
-                "message": ("STRING", {
-                    "default": "Content blocked due to moderation policy."
-                })
+                "threshold": ("FLOAT", {"default": 0.85, "min": 0.0, "max": 1.0, "step": 0.01}),
             }
         }
 
-    RETURN_TYPES = ()
-    FUNCTION = "evaluate"
-    CATEGORY = "Moderation/Blockers"
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "process"
+    CATEGORY = "comfyui-underage-filter"
 
-    def evaluate(self, condition, message):
-        if condition:
-            raise PermissionError(403, message)
-        return ()
+    def __init__(self):
+        # Load once
+        self.classifier = None
+        self.model_path = "/comfy/models/age-classifier"
+        self.ensure_model()
 
+    def ensure_model(self):
+        if self.classifier is None:
+            self.classifier = pipeline(
+                "image-classification",
+                model=self.model_path,
+                device=0 if torch.cuda.is_available() else -1,
+            )
 
-NODE_CLASS_MAPPINGS = {
-    "UnderageFilterNode": UnderageFilterNode,
-    "BooleanGateNode": BooleanGateNode
-}
+    def process(self, image, threshold):
+        # Convert tensor to PIL
+        image_pil = Image.fromarray((image[0].cpu().numpy() * 255).astype("uint8"))
 
-NODE_DISPLAY_NAME_MAPPINGS = {
-    "UnderageFilterNode": "Underage Filter",
-    "BooleanGateNode": "Boolean Gate"
-}
+        # Run classification
+        result = self.classifier(image_pil)[0]
+        score = result["score"]
+        label = result["label"]
+
+        if "under" in label.lower() and score >= threshold:
+            raise PermissionError(f"403 Forbidden: Image flagged as underage (score={score:.2f})")
+
+        return (image,)
