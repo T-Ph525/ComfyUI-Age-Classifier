@@ -19,7 +19,7 @@ class UnderageFilterNode:
 
     def __init__(self):
         self.classifier = None
-        self.model_path = "/root/comfy/ComfyUI/models/age_classifier"
+        self.model_path = "/comfy/models/age-classifier"
         self.ensure_model()
 
     def ensure_model(self):
@@ -55,7 +55,7 @@ class UnderageFilterGateNode:
 
     def __init__(self):
         self.classifier = None
-        self.model_path = "/root/comfy/ComfyUI/models/age_classifier"
+        self.model_path = "/comfy/models/age-classifier"
         self.ensure_model()
 
     def ensure_model(self):
